@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useStore } from './store'
 
 import { Routes, Route } from 'react-router-dom'
 
@@ -10,29 +10,19 @@ import NotFound from './pages/NotFound'
 
 
 function App() {
-  const [showNoteForm, setShowNoteForm] = useState(false)
-  const [notes, setNotes] = useState([])
-  const [editNote, setEditNote] = useState(null)
+  const { state } = useStore()
 
   return (
     <>
-      <Header setShowNoteForm={setShowNoteForm} />
-      {showNoteForm &&
-        <NoteForm
-          editNote={editNote}
-          setEditNote={setEditNote}
-          setShowNoteForm={setShowNoteForm}
-          setNotes={setNotes} />}
+      <Header />
+      {state.showNoteForm &&
+        <NoteForm />}
 
       <Routes>
         <Route
           path="/"
           element={
-            <Home
-              setShowNoteForm={setShowNoteForm}
-              setEditNote={setEditNote}
-              notes={notes}
-              setNotes={setNotes} />} />
+            <Home />} />
 
         <Route path="*" element={<NotFound />} />
 

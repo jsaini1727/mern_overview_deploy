@@ -1,64 +1,63 @@
-import axios from "axios"
+import axios from 'axios'
 import { useState, useEffect } from 'react'
-// useStates are asynchronous
 
+import { useStore } from '../store'
 
-function NoteForm({
-  editNote,
-  setEditNote,
-  setShowNoteForm,
-  setNotes }) {
+function NoteForm() {
+  const { state, setState } = useStore()
   const [noteText, setNoteText] = useState('')
 
-  useEffect(() =>{
-    if (editNote){
-      setNoteText(editNote.text)
+  useEffect(() => {
+    if (state.editNote) {
+      setNoteText(state.editNote.text)
     }
   }, [])
-
 
   const createOrEditNote = async (e) => {
     e.preventDefault()
 
-
-    if (!editNote) {
+    if (!state.editNote) {
       const res = await axios.post('/api/notes', {
         text: noteText
       })
-      setNotes((oldState) => {
-        return [...oldState, res.data]
+
+      setState({
+        ...state,
+        showNoteForm: false,
+        notes: [...state.notes, res.data]
       })
     } else {
       await axios.put('/api/note', {
-        note_id: editNote._id,
+        note_id: state.editNote._id,
         text: noteText
       })
-      setNotes((oldState) => {
 
+      state.editNote.text = noteText
 
-        editNote.text = noteText
-
-        return [...oldState]
-
-
+      setState({
+        ...state,
+        notes: [...state.notes],
+        showNoteForm: false,
+        editNote: null
       })
     }
-    setShowNoteForm(false)
-    setEditNote(null)
-
   }
 
-
-  const closeModal = () => setShowNoteForm(false)
+  const closeModal = () => {
+    setState({
+      ...state,
+      showNoteForm: false,
+      editNote: null
+    })
+  }
 
   const handleInputChange = (e) => {
     setNoteText(e.target.value)
-
   }
 
   return (
     <div className="note-form">
-      <h1 className="text-center">{editNote ? 'Edit' : 'Create'} Note</h1>
+      <h1 className="text-center">{state.editNote ? 'Edit' : 'Create'} Note</h1>
 
       <form onSubmit={createOrEditNote} className="column">
         <input
@@ -66,9 +65,8 @@ function NoteForm({
           onChange={handleInputChange}
           type="text"
           placeholder="Enter the note text" />
-        <button>{editNote ? 'Save' : 'Create'}</button>
+        <button>{state.editNote ? 'Save' : 'Create'}</button>
         <button onClick={closeModal} className="cancel-btn">Cancel</button>
-
       </form>
     </div>
   )

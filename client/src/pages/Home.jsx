@@ -1,26 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import axios from 'axios'
 import dayjs from 'dayjs'
 
-function Home({
-  setShowNoteForm,
-  setEditNote, 
-  notes, 
-  setNotes}) {
- 
+import { useStore } from '../store'
+
+function Home() {
+ const {state, setState} = useStore()
 
   useEffect(() => {
     axios.get('/api/notes')
       .then((res) => {
-        setNotes(res.data)
+        setState({
+          ...state,
+          notes: res.data
+        })
       })
   }, [])
 
   const handleEditNote = (note) => {
-    setEditNote(note)
-    setShowNoteForm(true)
+    setState({
+      ...state,
+      editNote: note,
+      showNoteForm: true
+    })
   }
-
     const deleteNote = async (note_id, index) => {
       // Show a confirmation dialog before deleting the note
       const confirmDelete = window.confirm('Are you sure you want to delete this note?');
@@ -28,24 +31,29 @@ function Home({
       if (confirmDelete) {
           // If user confirms, proceed with deletion
           await axios.delete('/api/note/' + note_id);
-          notes.splice(index, 1);
-          setNotes([...notes]);
+          state.notes.splice(index, 1);
+          setState({
+            ...state,
+            notes: [...state.notes]
+          });
           console.log('Note deleted successfully')
       } else {
           // If user cancels, do nothing
           console.log('Deletion canceled by user');
       }
-      setEditNote(null)
+      setState({
+        ...state,
+        editNote: null
+      })
   }
 
   return (
     <div>
       <h1>Welcome to the Note App</h1>
-      
-
+   
       <main className="notes-output">
-      {!notes.length && <h2>No notes have been added.</h2>}
-        {notes.map((note, index) => (
+          {!state.notes.length && <h2>No notes have been added.</h2>}
+          {state.notes.map((note, index) => (
           <div key={note._id} className="note">
             <h3>{note.text}</h3>
             <p>Created On: {dayjs(note.createdAt).format('MM/DD/YYYY hh:mm a')}</p>
