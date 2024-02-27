@@ -41,8 +41,10 @@ function Home({
   return (
     <div>
       <h1>Welcome to the Note App</h1>
+      
 
       <main className="notes-output">
+      {!notes.length && <h2>No notes have been added.</h2>}
         {notes.map((note, index) => (
           <div key={note._id} className="note">
             <h3>{note.text}</h3>
